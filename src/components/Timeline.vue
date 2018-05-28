@@ -15,7 +15,7 @@
           <th colspan="2" class="scale-medium">分类\</th>
           <template v-for="item in dateList">
             <template v-for="m in item.medium">
-              <th colspan="2" v-bind:id="m.tag" v-bind:start="m.start" v-bind:end="m.end" class="scale-medium">{{m.tagName}}</th>
+              <th colspan="2" v-bind:id="m.tag" v-bind:startYear="m.startYear" v-bind:startDate="m.startDate" v-bind:endYear="m.endYear" v-bind:endDate="m.endDate" class="scale-medium">{{m.tagName}}</th>
             </template>
           </template>
         </tr>
@@ -26,7 +26,7 @@
         <!-- 事件节点 -->
         <template v-for="item in lineInfo.historyList">
           <div class="timeline-cate" v-bind:tag="item.cateId">
-            <div v-for="node in item.line" v-bind:id="'node'+node.historyId"  class="timeline-node timeline-event-pointer" v-bind:time="node.time" v-bind:tag="node.title"></div>
+            <div v-for="node in item.line" v-bind:id="'node'+node.historyId" v-bind:year="node.year" v-bind:date="node.date"  class="timeline-node timeline-event-pointer"  v-bind:tag="node.title"></div>
           </div>
         </template>
         <!--<div class="timeline-node timeline-event-pointer"></div>-->
@@ -64,6 +64,7 @@
 
   // import axios from 'axios'
 
+  import DateUtil from 'static/js/date-util.js'
   import data from 'static/json/timeline.json'
 
   var initScale = 1
@@ -92,25 +93,25 @@
 
       // console.log(this.$refs)
       // console.log(this.dateList)
-      // let time = -4388000000
-      // console.log(this.calculateRange(time))
-      // time = -2388000000
-      // console.log(this.calculateRange(time))
-      // time = 2388000000
-      // console.log(this.calculateRange(time))
-      // time = -2378000000
-      // console.log(this.calculateRange(time))
-      // time = -2378040000
-      // console.log(this.calculateRange(time))
-      // time = 2378040000
-      // console.log(this.calculateRange(time))
-      // time = -2378010100
-      // console.log(this.calculateRange(time))
-      // time = 221011200
-      // console.log(this.calculateRange(time))
-      // time = -2210112013;
+      // let time = {year:-4388,date:0};
       // console.log(this.calculateRange(time));
-      // time = 2210112023;
+      // time = {year:-2388,date:0};
+      // console.log(this.calculateRange(time));
+      // time = {year:2388,date:0};
+      // console.log(this.calculateRange(time));
+      // time = {year:-2378,date:0};
+      // console.log(this.calculateRange(time));
+      // time = {year:-2378,date:40000};
+      // console.log(this.calculateRange(time));
+      // time = {year:2378,date:40000};
+      // console.log(this.calculateRange(time));
+      // time = {year:-2378,date:10100};
+      // console.log(this.calculateRange(time));
+      // time = {year:221,date:123000};
+      // console.log(this.calculateRange(time));
+      // time = {year:-221,date:112013};
+      // console.log(this.calculateRange(time));
+      // time = {year:221,date:112023};
       // console.log(this.calculateRange(time));
     },
     computed: {},
@@ -120,10 +121,10 @@
         for(let i = 0 ; i < this.dateList.length ; i++){
           for(let j = 0 ; j < this.dateList[i].medium.length ; j++){
             let item = this.dateList[i].medium[j]
-            if(parseInt(node.time) === item.tag){
-              let timeTag = document.getElementById(""+item.tag)
-              let nodeTag = document.getElementById("node"+node.historyId)
-              nodeTag.style.left = timeTag.offsetLeft + 23 + "px"
+            if(node.year >= item.startYear && node.year <= item.endYear && node.date >= item.startDate && node.date <= item.endDate){
+                let timeTag = document.getElementById(""+item.tag)
+                let nodeTag = document.getElementById("node"+node.historyId)
+                nodeTag.style.left = timeTag.offsetLeft + 23 + "px"
             }
           }
         }
@@ -143,108 +144,78 @@
         // 如果精确到月，则1月一个单位，12个月一个组
         // 如果精确到日，则2天一个单位，31天一个组，
         // 如果精确到时，则2小时一个单位，24小时一个组
-        let year = Math.pow(10, 6);
-        if (time > -5000 * year && time < -3001 * year) {
-          // 计算上下区间，200年一个单位
-          let n = time / year;
-          let obj = this.calStartAndEnd(-5000, 200, n);
-          return {
-            start: obj.start * year,
-            end: (obj.end - 1) * year,
-            range: -5000 * year
-          }
-        }
-        if (time > -3000 * year) {
-          if (this.jingquezhi(time) === 1) {
+        // let year = Math.pow(10, 6);
+        // console.log(time);
+        let rangeYear = 0;
+        let rangeDate = 0;
+        let startYear = 0;
+        let startDate = 0;
+        let endYear = 0;
+        let endDate = 0;
+        if (time.year >= -5000 && time.year < -3001) {
+          // -5000年到-3001年，200年一个单位
+          // let n = time.year / 100;
+          rangeYear = -5000;
+          startYear = -5000 + Math.floor((time.year - rangeYear)/200) * 200;
+          endYear = startYear + 199
+        }else if (time.year > -3000){
+          if (time.date === 0) {
             // -3000年以后，如果精确到年，则10年一个单位，100年一个组
-            let range = time > 0 ? Math.floor(time/(year*100)) * year * 100
-              : Math.ceil(time/(year * 100) - 1) * year * 100;
-            let start = Math.floor((time - range)/(year * 10)) * year * 10 + range
-            let end = start + 9*year
-            return {
-              start : start,
-              end : end,
-              range : range
-            }
-          } else if (this.jingquezhi(time) === 2) {
+            rangeYear = Math.floor(time.year/100) * 100;
+            startYear = Math.floor(time.year/10) * 10;
+            endYear = startYear + 9;
+          }else if(time.date%10000 === 0){
             // 如果精确到月，则1月一个单位，12个月一个组
-            let range = time > 0 ? Math.floor(time / year) * year + 10000 : Math.ceil(time / year) * year - 10000
-            return {
-              start: time,
-              end: time,
-              range: range
-            }
-          } else if (this.jingquezhi(time) === 3) {
+            rangeYear = time.year;
+            rangeDate = 10000;
+            startYear = time.year;
+            startDate = 10000;
+            endYear = time.year;
+            endDate = 120000;
+          }else if(time.date%100 === 0){
             // 如果精确到日，则2天一个单位，31天一个组，
-            let range = time > 0 ? Math.floor(time / 10000) * 10000 + 100 : Math.ceil(time / 10000) * 10000 - 100
-            // let range = Math.ceil(time/10000) * 10000 + (time > 0 ? 100 : -100);
-            let start = 0
-            let end = 0
-            if (time > 0) {
-              start = time % 200 === 0 ? time - 100 : time;
-              end = time % 200 === 0 ? time : time + 100;
-            } else {
-              start = time % 200 === 0 ? time + 100 : time;
-              end = time % 200 === 0 ? time : time - 100
+            let month = Math.floor(time.date/10000);
+            rangeYear = time.year;
+            rangeDate = Math.floor(time.date/10000) * 10000 + 100;
+
+            startYear = time.year;
+            startDate = time.date%200 === 0 ? time.date - 100 : time.date;
+            endYear = time.year;
+            endDate = startDate + 100;
+            let lastDate =  month * 10000 + DateUtil.getLastDay(time.year,month) * 100;
+            if(endDate > lastDate){
+              endDate = lastDate
             }
-            return {
-              start: start,
-              end: end,
-              range: range
-            }
-          } else if (this.jingquezhi(time) === 4) {
+          }else{
             // 如果精确到时，则2小时一个单位，24小时一个组
-            let range = time > 0 ? Math.floor(time / 100) * 100 + 1 : Math.ceil(time / 100) * 100 - 1
-            let start = 0
-            let end = 0
-            if (time > 0) {
-              start = time % 2 === 0 ? time - 1 : time;
-              end = time % 2 === 0 ? time : time + 1;
-            } else {
-              start = time % 2 === 0 ? time + 1 : time;
-              end = time % 2 === 0 ? time : time - 1
-            }
-            return {
-              start: start,
-              end: end,
-              range: range
-            }
+            rangeYear = time.year;
+            rangeDate = Math.floor(time.date/100) * 100;
+            startYear = time.year;
+            startDate = time.date%2 === 0 ? time.date : time.date - 1
+            endYear = time.year;
+            endDate = startDate + 1
           }
         }
-
-      },
-      calStartAndEnd: function (range, delta, time) {
-        let start = Math.floor((time - range) / delta) * delta + range;
-        let end = start + delta;
         return {
-          start: start,
-          end: end,
+          rangeYear : rangeYear,
+          rangeDate : rangeDate,
+          startYear : startYear,
+          startDate : startDate,
+          endYear : endYear,
+          endDate : endDate,
         }
       },
       compareDate: function (x, y) {
-        if (x < 0 && y < 0) {
-          let dx = x + Math.ceil(x / 100000) * 100000;
-          let dy = y + Math.ceil(y / 100000) * 100000;
-          if (x + dx > y + dy) {
-            return 1  // 年份较大
-          } else if (x + dx < y + dy) {
-            return -1
-          } else {
-            // 年份相同，则比较月份
-            if (dx > dy) {
-              return -1
-            } else if (dx < dy) {
-              return 1
-            } else {
-              return 0
-            }
-          }
-        } else {
-          if (x > y) {
+        if(x.year > y.year){
+          return 1
+        }else if(x.year < y.year){
+          return -1
+        }else{
+          if(x.date > y.date){
             return 1
-          } else if (x < y) {
+          }else if(x.date < y.date){
             return -1
-          } else {
+          }else{
             return 0
           }
         }
@@ -255,127 +226,138 @@
         // 将数据插入到dateList
         for (let i = 0; i < hl.length; i++) {
           for (let j = 0; j < hl[i].line.length; j++) {
-            dateList.push(hl[i].line[j].time)
+            dateList.push({
+              year : hl[i].line[j].year,
+              date : hl[i].line[j].date
+            })
           }
         }
-        // console.log(dateList)
+        console.log(dateList)
         // 排序
         let that = this;
         dateList.sort(function (x, y) {
-          x = parseInt(x);
-          y = parseInt(y);
           return that.compareDate(x, y)
         });
-
+        console.log("sort",dateList)
         let list = []
         // 开始计算时间轴
         for (let i = 0; i < dateList.length; i++) {
-          let date = parseInt(dateList[i]);
-          let obj = this.calculateRange(date)
-          let isExist = false;
+          let time = dateList[i];
+          let medium = this.calculateRange(time); // 要插入的数据
+          let isMajorExist = false;
           for (let j = 0; j < list.length; j++) {
-            let tmp = list[j];
-            if (tmp.range === obj.range) {
-              isExist = true;
-              tmp.medium.push({
-                start: obj.start,
-                end: obj.end,
-                tag: date,
-                tagName : this.getTagName(date),
-              });
-              tmp.end = obj.end;
-              let name = this.getFullName(obj.end)
-              if(name !== tmp.tagName){
-                tmp.tagName = this.getFullName(obj.start)+ "至"+this.getFullName(obj.end)
+            let major = list[j];    // 范围Item
+            // 如果再同一年同一个日期范围内，则插入到列表中
+            if (major.rangeYear === medium.rangeYear && major.rangeDate === medium.rangeDate) {
+              isMajorExist = true;
+              let isMediumExist = false;
+              for(let j = 0 ; j < major.medium.length ; j++){
+                let m = major.medium[j];
+                if(m.startYear === medium.startYear && m.startDate === medium.startDate){
+                  isMediumExist = true;
+                  break;
+                }
               }
-
-
-              break
+              if(!isMediumExist){
+                medium.tag = this.getTag(medium);
+                medium.tagName = this.getMediumTagName(medium)
+                major.medium.push(medium);
+                // 更改范围tagName
+                major.endYear = medium.endYear;
+                major.endDate = medium.endDate;
+                major.tagName = this.getMajorTagName(major)
+                break
+              }
             }
           }
-          if (!isExist) {
-            let n = {
-              tagName: this.getFullName(obj.range),
-              start: obj.start,
-              end: obj.end,
-              range: obj.range,
-              medium: [
-                {
-                  start: obj.start,
-                  end: obj.end,
-                  tag: date,
-                  tagName : this.getTagName(date)
-                }
-              ]
+          // 如果找不到，则插入到新建major
+          if (!isMajorExist) {
+            let major = {
+              tagName: this.getMajorTagName(medium),
+              rangeYear: medium.rangeYear,
+              rangeDate: medium.rangeDate,
+              startYear: medium.startYear,
+              startDate: medium.startDate,
+              endYear: medium.endYear,
+              endDate: medium.endDate,
+              medium : [],
             };
-            list.push(n)
+            medium.tag = this.getTag(medium);
+            medium.tagName = this.getMediumTagName(medium)
+            major.medium.push(medium)
+            list.push(major)
           }
         }
-        return list
-        // console.log(list)
+        console.log(list)
+        return list;
+
       },
-      jingquezhi: function (date) {
-        let d = date % 1000000;
-        if (d === 0) {
-          return 1    // 年
+      getTag(time){
+        let year = time.startYear;
+        let date = time.startDate;
+        let len = date.toString().length;
+        while(len < 6){
+          date = "0" + date;
+          len++;
         }
-        d = d % 10000;
-        if (d === 0) {
-          return 2  // 月
-        }
-        d = d % 100;
-        if (d === 0) {
-          return 3  // 日
-        }
-        return 4 // 时
+        return year + date;
       },
-      getTagName : function(time){
-        var j = this.jingquezhi(time)
-        if(j === 1){
-          // 年
-          let year = time > 0 ? Math.floor(time / Math.pow(10,6)) : Math.ceil(time/Math.pow(10,6))
-          if(year < 0) {
-            year = "BC"+(-year)
+      getMajorTagName(major){
+        let startStr = "";
+        let endStr = ""
+        startStr = this.getMajorTagNameByTime(major.startYear,major.startDate);
+        endStr = this.getMajorTagNameByTime(major.endYear,major.endDate);
+        if(startStr === endStr){
+          return startStr
+        }else{
+          return startStr + "至" + endStr
+        }
+      },
+      getMediumTagName(medium){
+        return this.getMediumTagNameByTime(medium.startYear,medium.startDate)
+        // return this.getTagName(medium.startYear,1) + this.getTagName(medium.startDate,3,1)
+      },
+      getMediumTagNameByTime(year,date){
+        if(date === 0){
+          if(year < 0){
+            return "BC" + (-year) + "年"
+          }else{
+            return year + "年"
           }
-          return year+"年"
-        }else if(j === 2){
-          // 月
-          let str = String(time)
-          let res =  str.substring(str.length - 6,str.length - 4)
-          return res + "月";
-        }else if(j === 3){
-          // 日
-          let str = String(time)
-          let res =  str.substring(str.length - 4,str.length - 2)
-          return res + "日";
-        }else if(j === 4){
-          let str = String(time)
-          let res =  str.substring(str.length - 2,str.length)
-          return res + "时";
+        }else{
+          let month = Math.floor(date/10000);
+          date = date - month * 10000;
+          let day = Math.floor(date/100);
+          date = date - day * 100;
+          let hour = date
+          if(hour !== 0){
+            return hour + ":00"
+          }else if(day !== 0){
+            return day + "日"
+          }else if(month !== 0){
+            return month + "月"
+          }
         }
       },
-      getFullName : function(time){
-        // return time
-        var j = this.jingquezhi(time)
-        if(j === 1 || j === 2){
-          let year = time > 0 ? Math.floor(time / Math.pow(10,6)) : Math.ceil(time/Math.pow(10,6))
-          if(year < 0) {
-            year = "BC"+(-year)
-          }
-          return year+"年"
-        }else if(j === 3){
-          let str = String(time)
-          let year = str.substring(0, str.length - 6)
-          let res =  str.substring(str.length - 6,str.length - 4)
-          return year + "年"+res + "月";
-        }else if(j === 4){
-          let str = String(time)
-          let year = str.substring(0, str.length - 6)
-          let month = str.substring(str.length - 6, str.length - 4)
-          let res =  str.substring(str.length - 4,str.length - 2)
-          return year+"年"+month+"月"+res + "日";
+      getMajorTagNameByTime(year,date){
+        let str = ""
+        if(year < 0){
+          str += "BC" + (-year)
+        }else{
+          str += year
         }
-      }
+        let month = Math.floor(date/10000);
+        date = date - month * 10000;
+        let day = Math.floor(date/100);
+        date = date - day * 100;
+        let hour = date
+        if(hour !== 0 && day !== 0 && month !== 0) {
+          str += "/"+month + "/" + day
+        }else if(hour === 0 && day !== 0 && month !== 0){
+          str += "/"+month
+        }
+        return str
+      },
     }
   }
 </script>

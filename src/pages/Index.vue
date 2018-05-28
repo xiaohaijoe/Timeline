@@ -1,7 +1,7 @@
 <template>
   <div id="index">
 
-    <div class="line-box" style="top: 10599px; left: -2740.8px; width: 86.26px; height: 46.5697px;">
+    <div class="line-box" style="top: 0px; left: 0px; width: 86.26px; height: 46.5697px;">
       <svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg" class="line-svg">
         <g class="line-svg-path  selected">
           <path d="M20 20 C 66.25996016546014 20, 20 26.56973987839956, 66.25996016546014 26.56973987839956 "
@@ -48,7 +48,7 @@
 
   Vue.use(AlloyFingerPlugin, {
     AlloyFinger
-  })
+  });
 
   export default {
     name: "Index",
