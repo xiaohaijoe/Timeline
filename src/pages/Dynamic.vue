@@ -1,12 +1,12 @@
 <template>
   <div id="dynamics">
-    <div class="point1" id="point1" v-finger:long-tap="onLongTap" ></div>
+    <div class="point1" id="point1" v-finger:long-tap="onLongTap"></div>
     <div class="point2" id="point2" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
     <div class="line-layer">
       <div class="line-box" v-for="line in lineList" v-bind:style="line.boxStyle">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <g>
-            <path v-bind:d="line.d" stroke-width="1.5"  stroke="black" fill="none"/>
+            <path v-bind:d="line.d" stroke-width="1.5" stroke="black" fill="none"/>
           </g>
         </svg>
       </div>
@@ -20,30 +20,31 @@
   import dynamics from 'dynamics.js'
   import AlloyFinger from 'alloyfinger'
   import AlloyFingerPlugin from 'alloyfinger/vue/alloy_finger.vue'
+
   Vue.use(AlloyFingerPlugin, {
     AlloyFinger
   });
 
   export default {
     name: "Dynamic",
-    data (){
+    data() {
       return {
-        isLongTap : false,
-        startElem : null,
-        lineList : [],
+        isLongTap: false,
+        startElem: null,
+        lineList: [],
       }
     },
     mounted() {
 
     },
     methods: {
-      onTap : function(event){
-        if(this.isLongTap){
+      onTap: function (event) {
+        if (this.isLongTap) {
           console.log("connect");
           // 如果是长按时间，则用svg path将两个节点连接起来
           let startElem = this.startElem;
           let endElem = event.target;
-          this.connectByLine(startElem,endElem);
+          this.connectByLine(startElem, endElem);
           // this.pointerStyle = {
           //     display:"block",
           //     left:this.startX + "px",
@@ -55,47 +56,121 @@
           this.isLongTap = false;
         }
       },
-      getLineDirection(e1x,e1y,e1w,e2x,e2y,e2w){
-        let direction = 1;
-        if(e1x > e2x){
-          if(e2x + e2w/2 > e1x){
-            if(e2y > e1y){
-              direction = 1
-            }else{
-              direction = 3
+      getLinePointerSize: function (e1x, e1y, e1w, e1h, e2x, e2y, e2w, e2h) {
+        let direction = 'none';
+        let b1x, b1y, b2x, b2y = 0;
+        let left, top = 0;
+        if (e1x > e2x) {
+          if (e2x + e2w / 2 > e1x - e1w / 2) {
+            if (e2y > e1y) {
+              direction = 'topRight'; // elem1 in the right top of elem2
+              b1x = e1x + 20;
+              b1y = e1y + e1h / 2 - 20;
+              b2x = e2x - 20;
+              b2y = e2y - e2h / 2 + 20;
+              left = b2x;
+              top = b1y;
+            } else {
+              direction = 'bottomRight';
+              b1x = e1x + 20;
+              b1y = e1y - e1h / 2 + 20;
+              b2x = e2x - 20;
+              b2y = e2y + e2h / 2 - 20;
+              left = b2x;
+              top = b1y;
             }
-          }else{
-            direction = 2
+          } else {
+            if (e2y > e1y) {
+              direction = 'rightBottom';
+              b1x = e1x - e1w / 2 + 20;
+              b1y = e2y + 20;
+              b2x = e2x + e2w / 2 - 20;
+              b2y = e2y - 20;
+              left = b2x;
+              top = b2y;
+            } else {
+              direction = 'rightTop'
+              b1x = e1x - e1w / 2 - 20;
+              b1y = e1y - 20;
+              b2x = e2x + e2w / 2 - 20;
+              b2y = e2y + 20;
+              left = b2x;
+              top = b1y;
+            }
           }
-        }else{
-          if(e1x + e1w/2 > e2x){
-            if(e2y > e1y){
-              direction = 3
-            }else{
-              direction = 1
+        } else {
+          if (e1x + e1w / 2 > e2x - e2w / 2) {
+            if (e2y > e1y) {
+              direction = 'topLeft';
+              b1x = e1x - 20;
+              b1y = e1y + e1h / 2 - 20;
+              b2x = e2x + 20;
+              b2y = e2y - e2h / 2 + 20;
+              left = b1x;
+              top = b1y;
+            } else {
+              direction = 'bottomLeft';
+              b1x = e1x - 20;
+              b1y = e1y - e1h / 2 + 20;
+              b2x = e2x + 20;
+              b2y = e2y + e2h / 2 - 20;
+              left = b1x;
+              top = b2y;
             }
-          }else{
-            direction = 4
+          } else {
+            if (e2y > e1y) {
+              direction = 'leftBottom';
+              b1x = e1x + e1w / 2 - 20;
+              b1y = e1y + 20;
+              b2x = e2x - e2w / 2 + 20;
+              b2y = e2y - 20;
+              left = b1x;
+              top = b2y;
+            } else {
+              direction = 'leftTop';
+              b1x = e1x + e1w / 2 - 20;
+              b1y = e1y - 20;
+              b2x = e2x - e2w / 2 + 20;
+              b2y = e2y + 20;
+              left = b1x;
+              top = b1y;
+            }
           }
         }
-        return direction
+        return {
+          direction: direction,
+          b1x: b1x,
+          b1y: b1y,
+          b2x: b2x,
+          b2y: b2y,
+          left: left,
+          top: top
+        }
       },
-      connectByLine : function(elem1,elem2) {
-        let e1x = elem1.offsetLeft + elem1.clientWidth;
-        let e1y = elem1.offsetTop + elem1.clientHeight/2;
+      connectByLine: function (elem1, elem2) {
+        // 计算中心点距离
+        let e1x = elem1.offsetLeft + elem1.clientWidth / 2;
+        let e1y = elem1.offsetTop + elem1.clientHeight / 2;
         let e1w = elem1.clientWidth;
         let e1h = elem1.clientHeight;
-        let e2x = elem2.offsetLeft + elem2.clientWidth;
-        let e2y = elem2.offsetTop + elem2.clientHeight/2;
+        let e2x = elem2.offsetLeft + elem2.clientWidth / 2;
+        let e2y = elem2.offsetTop + elem2.clientHeight / 2;
         let e2w = elem2.clientWidth;
         let e2h = elem2.clientHeight;
-        let direction = this.getLineDirection(e1x,e1y,e1w,e2x,e2y,e2w);
-        let boxWidth = 0;
-        if(direction === 1 || direction === 3){
-          boxWidth = Math.abs(e1x - e2x) + 40
-        }else{
+        let pointer = this.getLinePointerSize(e1x, e1y, e1w, e1h, e2x, e2y, e2w, e2h);
 
-        }
+        let boxStyle = {
+          width: Math.abs(pointer.b1x - pointer.b2x) + "px",
+          height: Math.abs(pointer.b1y - pointer.b2y) + "px",
+          display: "absolute",
+          left: pointer.left + "px",
+          top: pointer.top + "px"
+        };
+        console.log(pointer);
+        console.log(boxStyle);
+        let line = {
+          boxStyle: boxStyle
+        };
         // let boxWidth = Math.abs(e1x - e2x) - e1w/2 - e2w/2 + 40
 
         // let boxWidth = elem2x - elem1x + 40;
@@ -164,6 +239,7 @@
     top: 20px;
     background: red;
   }
+
   .point2 {
     position: absolute;
     width: 30px;
@@ -174,13 +250,14 @@
   }
 
   /*path {*/
-    /*marker-end: url(#Triangle);*/
+  /*marker-end: url(#Triangle);*/
   /*}*/
 
-  .line-box{
+  .line-box {
     position: absolute;
   }
-  .line-box path{
+
+  .line-box path {
     stroke-width: 3px;
     stroke: #acacac;
     marker-end: url(#Triangle);
