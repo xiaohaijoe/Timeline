@@ -3,6 +3,7 @@
     <div class="point1" id="point1" v-finger:long-tap="onLongTap"></div>
     <div class="point2" id="point2" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
     <div class="point3" id="point3" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
+    <div class="point4" id="point4" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
     <div class="line-layer">
       <div class="line-box" v-for="line in lineList" v-bind:style="line.boxStyle">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -91,6 +92,12 @@
             }else{
               // e2 在 e1 下方偏右
               direction = 'bottomRight'
+              b1x = e1x - 20;
+              b1y = e1y + e1h - 20;
+              b2x = e2x + 20;
+              b2y = e2y - e2h + 20;
+              left = e1x;
+              top = e1y;
             }
           }else{
             // e1 右边界 < e2 左边界
@@ -103,7 +110,7 @@
               b1x = e1x + e1w/2 - 20;
               b1y = e1y - 20;
               b2x = e2x - e2w/2 + 20;
-              b2y = e2y - e2h/2 + 20;
+              b2y = e2y + 20;
               left = b1x;
               top = b1y;
             }
@@ -308,6 +315,15 @@
     width: 30px;
     height: 30px;
     left: 200px;
+    top: 200px;
+    background: red;
+  }
+
+  .point4 {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    left: 120px;
     top: 200px;
     background: red;
   }
