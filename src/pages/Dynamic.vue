@@ -2,6 +2,7 @@
   <div id="dynamics">
     <div class="point1" id="point1" v-finger:long-tap="onLongTap"></div>
     <div class="point2" id="point2" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
+    <div class="point3" id="point3" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
     <div class="line-layer">
       <div class="line-box" v-for="line in lineList" v-bind:style="line.boxStyle">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -60,83 +61,131 @@
         let direction = 'none';
         let b1x, b1y, b2x, b2y = 0;
         let left, top = 0;
-        if (e1x > e2x) {
-          if (e2x + e2w / 2 > e1x - e1w / 2) {
-            if (e2y > e1y) {
-              direction = 'topRight'; // elem1 in the right top of elem2
-              b1x = e1x + 20;
-              b1y = e1y + e1h / 2 - 20;
-              b2x = e2x - 20;
-              b2y = e2y - e2h / 2 + 20;
-              left = b2x;
-              top = b1y;
-            } else {
-              direction = 'bottomRight';
-              b1x = e1x + 20;
-              b1y = e1y - e1h / 2 + 20;
-              b2x = e2x - 20;
-              b2y = e2y + e2h / 2 - 20;
-              left = b2x;
-              top = b1y;
+        if (e1x > e2x){
+          // e2 在 e1 左边边
+          if(e1x - e1w/2 < e2x + e2w/2){
+            // e1左边界 < e2右边界
+            if(e1y > e2y){
+              // e2 在 e1 下方偏左
+              direction = 'bottomLeft';
+            }else{
+              // e2 在 e1 上方偏左
+              direction = 'topLeft';
             }
-          } else {
-            if (e2y > e1y) {
-              direction = 'rightBottom';
-              b1x = e1x - e1w / 2 + 20;
-              b1y = e2y + 20;
-              b2x = e2x + e2w / 2 - 20;
-              b2y = e2y - 20;
-              left = b2x;
-              top = b2y;
-            } else {
-              direction = 'rightTop'
-              b1x = e1x - e1w / 2 - 20;
-              b1y = e1y - 20;
-              b2x = e2x + e2w / 2 - 20;
-              b2y = e2y + 20;
-              left = b2x;
-              top = b1y;
+          }else{
+            // e1左边界 > e2 右边界
+            if(e1y > e2y){
+              // e2 在 e1 左边偏下
+              direction = 'leftBottom';
+            }else{
+              // e2 在 e1 左边偏上
             }
           }
-        } else {
-          if (e1x + e1w / 2 > e2x - e2w / 2) {
-            if (e2y > e1y) {
-              direction = 'topLeft';
-              b1x = e1x - 20;
-              b1y = e1y + e1h / 2 - 20;
-              b2x = e2x + 20;
-              b2y = e2y - e2h / 2 + 20;
-              left = b1x;
-              top = b1y;
-            } else {
-              direction = 'bottomLeft';
-              b1x = e1x - 20;
-              b1y = e1y - e1h / 2 + 20;
-              b2x = e2x + 20;
-              b2y = e2y + e2h / 2 - 20;
-              left = b1x;
-              top = b2y;
+        }else{
+          // e2 在 e1 右边
+          if(e1x + e1w/2 > e2x - e2w/2){
+            // e1 右边界 > e2 左边界
+            if(e1y > e2y){
+              // e2 在 e1 上方偏右
+              direction = 'topRight'
+            }else{
+              // e2 在 e1 下方偏右
+              direction = 'bottomRight'
             }
-          } else {
-            if (e2y > e1y) {
-              direction = 'leftBottom';
-              b1x = e1x + e1w / 2 - 20;
-              b1y = e1y + 20;
-              b2x = e2x - e2w / 2 + 20;
-              b2y = e2y - 20;
-              left = b1x;
-              top = b2y;
-            } else {
-              direction = 'leftTop';
-              b1x = e1x + e1w / 2 - 20;
+          }else{
+            // e1 右边界 < e2 左边界
+            if(e1y > e2y){
+              // e2 在 e1 右方偏上
+              direction = 'rightTop';
+            }else{
+              // e2 在 e1 右方偏下
+              direction = 'rightBottom';
+              b1x = e1x + e1w/2 - 20;
               b1y = e1y - 20;
-              b2x = e2x - e2w / 2 + 20;
-              b2y = e2y + 20;
+              b2x = e2x - e2w/2 + 20;
+              b2y = e2y - e2h/2 + 20;
               left = b1x;
               top = b1y;
             }
           }
         }
+        // if (e1x > e2x) {
+        //   if (e2x + e2w / 2 > e1x - e1w / 2) {
+        //     if (e2y > e1y) {
+        //       direction = 'topRight'; // elem1 in the top right of elem2
+        //       b1x = e1x + 20;
+        //       b1y = e1y + e1h / 2 - 20;
+        //       b2x = e2x - 20;
+        //       b2y = e2y - e2h / 2 + 20;
+        //       left = b2x;
+        //       top = b1y;
+        //     } else {
+        //       direction = 'bottomRight';
+        //       b1x = e1x + 20;
+        //       b1y = e1y - e1h / 2 + 20;
+        //       b2x = e2x - 20;
+        //       b2y = e2y + e2h / 2 - 20;
+        //       left = b2x;
+        //       top = b1y;
+        //     }
+        //   } else {
+        //     if (e2y > e1y) {
+        //       direction = 'rightBottom';
+        //       b1x = e1x - e1w / 2 + 20;
+        //       b1y = e2y + 20;
+        //       b2x = e2x + e2w / 2 - 20;
+        //       b2y = e2y - 20;
+        //       left = b2x;
+        //       top = b2y;
+        //     } else {
+        //       direction = 'rightTop'
+        //       b1x = e1x - e1w / 2 - 20;
+        //       b1y = e1y - 20;
+        //       b2x = e2x + e2w / 2 - 20;
+        //       b2y = e2y + 20;
+        //       left = b2x;
+        //       top = b1y;
+        //     }
+        //   }
+        // } else {
+        //   if (e1x + e1w / 2 > e2x - e2w / 2) {
+        //     if (e2y > e1y) {
+        //       direction = 'topLeft';
+        //       b1x = e1x - 20;
+        //       b1y = e1y + e1h / 2 - 20;
+        //       b2x = e2x + 20;
+        //       b2y = e2y - e2h / 2 + 20;
+        //       left = b1x;
+        //       top = b1y;
+        //     } else {
+        //       direction = 'bottomLeft';
+        //       b1x = e1x - 20;
+        //       b1y = e1y - e1h / 2 + 20;
+        //       b2x = e2x + 20;
+        //       b2y = e2y + e2h / 2 - 20;
+        //       left = b1x;
+        //       top = b2y;
+        //     }
+        //   } else {
+        //     if (e2y > e1y) {
+        //       direction = 'leftBottom';
+        //       b1x = e1x + e1w / 2 - 20;
+        //       b1y = e1y + 20;
+        //       b2x = e2x - e2w / 2 + 20;
+        //       b2y = e2y - 20;
+        //       left = b1x;
+        //       top = b2y;
+        //     } else {
+        //       direction = 'leftTop';
+        //       b1x = e1x + e1w / 2 - 20;
+        //       b1y = e1y - 20;
+        //       b2x = e2x - e2w / 2 + 20;
+        //       b2y = e2y + 20;
+        //       left = b1x;
+        //       top = b1y;
+        //     }
+        //   }
+        // }
         return {
           direction: direction,
           b1x: b1x,
@@ -157,6 +206,7 @@
         let e2y = elem2.offsetTop + elem2.clientHeight / 2;
         let e2w = elem2.clientWidth;
         let e2h = elem2.clientHeight;
+        // 获取两个元素之间的关系
         let pointer = this.getLinePointerSize(e1x, e1y, e1w, e1h, e2x, e2y, e2w, e2h);
 
         let boxStyle = {
@@ -164,10 +214,14 @@
           height: Math.abs(pointer.b1y - pointer.b2y) + "px",
           display: "absolute",
           left: pointer.left + "px",
-          top: pointer.top + "px"
+          top: pointer.top + "px",
+          background :"rgba(0,0,0,0.5)",
         };
+        console.log("pointer1","x:",e1x,"y:",e1y,"w",e1w,"h",e1h);
+        console.log("pointer2","x:",e2x,"y:",e2y,"w",e2w,"h",e2h);
         console.log(pointer);
         console.log(boxStyle);
+
         let line = {
           boxStyle: boxStyle
         };
@@ -196,7 +250,8 @@
       },
       onLongTap: function (event) {
         // console.log(event.target.offsetTop)
-        console.log(event.target.clientWidth)
+        // console.log(event.target.clientWidth)
+        console.log("click");
         // console.log("longtap");
         this.startElem = event.target;
         // this.startX = event.target.offsetLeft + event.target.clientWidth; // 起始x坐标
@@ -235,8 +290,8 @@
     position: absolute;
     width: 30px;
     height: 30px;
-    left: 20px;
-    top: 20px;
+    left: 100px;
+    top: 100px;
     background: red;
   }
 
@@ -245,7 +300,15 @@
     width: 30px;
     height: 30px;
     left: 200px;
-    top: 20px;
+    top: 100px;
+    background: red;
+  }
+  .point3 {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    left: 200px;
+    top: 200px;
     background: red;
   }
 
