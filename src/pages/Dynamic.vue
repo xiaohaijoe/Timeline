@@ -1,8 +1,9 @@
 <template>
   <div id="dynamics">
-    <div class="point1" id="point1" v-finger:long-tap="onLongTap"></div>
+    <div class="point1" id="point1" v-finger:long-tap="onLongTap" v-finger:tap="onTap"  v-finger:press-move="pressMove.bind(this)"></div>
     <div class="point2" id="point2" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
     <div class="point3" id="point3" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
+    <div class="point4" id="point4" v-finger:long-tap="onLongTap" v-finger:tap="onTap"></div>
     <div class="line-layer">
       <div class="line-box" v-for="line in lineList" v-bind:style="line.boxStyle">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -21,6 +22,7 @@
   import dynamics from 'dynamics.js'
   import AlloyFinger from 'alloyfinger'
   import AlloyFingerPlugin from 'alloyfinger/vue/alloy_finger.vue'
+  import Transform from '../../static/js/transform.js'
 
   Vue.use(AlloyFingerPlugin, {
     AlloyFinger
@@ -36,10 +38,25 @@
       }
     },
     mounted() {
+      let el = document.getElementById("point1");
+      Transform(el);
 
     },
     methods: {
+      pressMove : function(evt){
+        let obj = evt.target;
+        let left = obj.offsetLeft + evt.deltaX;
+        let top = obj.offsetTop + evt.deltaY;
+        obj.style.left = left + "px";
+        obj.style.top = top + "px";
+
+        let p2 = document.getElementById("point2");
+        this.connectByLine(obj,p2)
+        // this.isMoving = true
+        // evt.preventDefault();
+      },
       onTap: function (event) {
+        console.log("tap")
         if (this.isLongTap) {
           console.log("connect");
           // 如果是长按时间，则用svg path将两个节点连接起来
@@ -57,135 +74,162 @@
           this.isLongTap = false;
         }
       },
+      countBezierPoint : function(sx,sy,ex,ey,direction){
+        let p1x,p1y,p2x,p2y = 0;
+        if(direction === 'topLeft' || direction === 'topRight') {
+          p1x = sx;
+          p1y = ey + Math.abs(sy - ey) / 3;
+          p2x = ex;
+          p2y = sy - Math.abs(sy - ey) / 3;
+        }else if(direction === 'rightBottom' || direction === 'rightTop'){
+          p1x = ex - Math.abs(sx - sy) / 3;
+          p1y = sy;
+          p2x = sx + Math.abs(sx - sy) / 3;
+          p2y = ey;
+        }else if(direction === 'bottomRight' || direction === 'bottomLeft'){
+          p1x = sx;
+          p1y = ey - Math.abs(sy - ey)/3;
+          p2x = ex;
+          p2y = sy + Math.abs(sy - ey)/3;
+        }else if(direction === 'leftTop' || direction === 'leftBottom'){
+          p1x = ex + Math.abs(sx - ex)/3;
+          p1y = sy;
+          p2x = sx - Math.abs(sx - ex)/3;
+          p2y = ey;
+        }
+
+        return {
+          p1x : p1x,
+          p1y : p1y,
+          p2x : p2x,
+          p2y : p2y,
+        }
+      },
       getLinePointerSize: function (e1x, e1y, e1w, e1h, e2x, e2y, e2w, e2h) {
         let direction = 'none';
         let b1x, b1y, b2x, b2y = 0;
         let left, top = 0;
-        if (e1x > e2x){
+        let sx,sy,ex,ey = 0;
+        if (e1x > e2x) {
           // e2 在 e1 左边边
-          if(e1x - e1w/2 < e2x + e2w/2){
+          if (e1x - e1w / 2 < e2x + e2w / 2) {
             // e1左边界 < e2右边界
-            if(e1y > e2y){
-              // e2 在 e1 下方偏左
-              direction = 'bottomLeft';
-            }else{
+            if (e1y > e2y) {
               // e2 在 e1 上方偏左
               direction = 'topLeft';
-            }
-          }else{
-            // e1左边界 > e2 右边界
-            if(e1y > e2y){
-              // e2 在 e1 左边偏下
-              direction = 'leftBottom';
-            }else{
-              // e2 在 e1 左边偏上
-            }
-          }
-        }else{
-          // e2 在 e1 右边
-          if(e1x + e1w/2 > e2x - e2w/2){
-            // e1 右边界 > e2 左边界
-            if(e1y > e2y){
-              // e2 在 e1 上方偏右
-              direction = 'topRight'
-            }else{
-              // e2 在 e1 下方偏右
-              direction = 'bottomRight'
-            }
-          }else{
-            // e1 右边界 < e2 左边界
-            if(e1y > e2y){
-              // e2 在 e1 右方偏上
-              direction = 'rightTop';
-            }else{
-              // e2 在 e1 右方偏下
-              direction = 'rightBottom';
-              b1x = e1x + e1w/2 - 20;
-              b1y = e1y - 20;
-              b2x = e2x - e2w/2 + 20;
+              b1x = e1x + 20;
+              b1y = e1y - e1h / 2 + 20;
+              b2x = e2x - 20;
+              b2y = e2y + e2h / 2 - 20;
+              left = b2x;
+              top = b2y;
+              sx = b1x - b2x - 20;
+              sy = b1y - b2y - 20;
+              ex = 20;
+              ey = 20;
+            } else {
+              // e2 在 e1 下方偏左
+              direction = 'bottomLeft';
+              b1x = e1x + 20;
+              b1y = e1y + e1h/2 - 20;
+              b2x = e2x - 20;
               b2y = e2y - e2h/2 + 20;
-              left = b1x;
+              left = b2x;
+              top = b1y;
+              sx = b1x - b2x - 20;
+              sy = 20;
+              ex = 20;
+              ey = b2y - b1y - 20;
+            }
+          } else {
+            // e1左边界 > e2 右边界
+            if (e1y > e2y) {
+              // e2 在 e1 左边偏上
+              direction = 'leftTop';
+              b1x = e1x - e1w/2 + 20;
+              b1y = e1y + 20;
+              b2x = e2x + e2w/2 - 20;
+              b2y = e2y - 20;
+              left = b2x;
+              top = b2y;
+              sx = b1x - b2x - 20;
+              sy = b1y - b2y - 20;
+              ex = 20;
+              ey = 20;
+            } else {
+              // e2 在 e1 左边偏下
+              direction = 'leftBottom'
+              b1x = e1x - e1w/2 +20;
+              b1y = e1y - 20;
+              b2x = e2x + e2w/2 - 20;
+              b2y = e2y + 20;
+              left = b2x;
               top = b1y;
             }
           }
+        } else {
+          // e2 在 e1 右边
+          if (e1x + e1w / 2 > e2x - e2w / 2) {
+            // e1 右边界 > e2 左边界
+            if (e1y > e2y) {
+              // e2 在 e1 上方偏右
+              direction = 'topRight'
+              b1x = e1x - 20;
+              b1y = e1y - e1h/2 + 20;
+              b2x = e2x + 20;
+              b2y = e2y + e2h/2 - 20;
+              left = b1x;
+              top = b2y;
+              sx = 20;
+              sy = b1y - b2y - 20;
+              ex = b2x - b1x - 20;
+              ey = 20;
+            } else {
+              // e2 在 e1 下方偏右
+              direction = 'bottomRight'
+              b1x = e1x - 20;
+              b1y = e1y + e1h / 2 - 20;
+              b2x = e2x + 20;
+              b2y = e2y - e2h / 2 + 20;
+              left = b1x;
+              top = b1y;
+              sx = 20;
+              sy = 20;
+              ex = b2x - b1x - 20;
+              ey = b2y - b1y - 20;
+            }
+          } else {
+            // e1 右边界 < e2 左边界
+            if (e1y > e2y) {
+              // e2 在 e1 右方偏上
+              direction = 'rightTop';
+              b1x = e1x + e1w/2 - 20;
+              b1y = e1y + 20;
+              b2x = e2x - e2w/2 + 20;
+              b2y = e2y - 20;
+              left = b1x;
+              top = b2y;
+              sx = 20;
+              sy = b1y - b2y - 20;
+              ex = b2x - b1x - 20;
+              ey = 20;
+            } else {
+              // e2 在 e1 右方偏下
+              direction = 'rightBottom';
+              b1x = e1x + e1w / 2 - 20;
+              b1y = e1y - 20;
+              b2x = e2x - e2w / 2 + 20;
+              b2y = e2y + 20;
+              left = b1x;
+              top = b1y;
+              sx = 20;
+              sy = 20;
+              ex = b2x - b1x - 20;
+              ey = b2y - b1y - 20;
+            }
+          }
         }
-        // if (e1x > e2x) {
-        //   if (e2x + e2w / 2 > e1x - e1w / 2) {
-        //     if (e2y > e1y) {
-        //       direction = 'topRight'; // elem1 in the top right of elem2
-        //       b1x = e1x + 20;
-        //       b1y = e1y + e1h / 2 - 20;
-        //       b2x = e2x - 20;
-        //       b2y = e2y - e2h / 2 + 20;
-        //       left = b2x;
-        //       top = b1y;
-        //     } else {
-        //       direction = 'bottomRight';
-        //       b1x = e1x + 20;
-        //       b1y = e1y - e1h / 2 + 20;
-        //       b2x = e2x - 20;
-        //       b2y = e2y + e2h / 2 - 20;
-        //       left = b2x;
-        //       top = b1y;
-        //     }
-        //   } else {
-        //     if (e2y > e1y) {
-        //       direction = 'rightBottom';
-        //       b1x = e1x - e1w / 2 + 20;
-        //       b1y = e2y + 20;
-        //       b2x = e2x + e2w / 2 - 20;
-        //       b2y = e2y - 20;
-        //       left = b2x;
-        //       top = b2y;
-        //     } else {
-        //       direction = 'rightTop'
-        //       b1x = e1x - e1w / 2 - 20;
-        //       b1y = e1y - 20;
-        //       b2x = e2x + e2w / 2 - 20;
-        //       b2y = e2y + 20;
-        //       left = b2x;
-        //       top = b1y;
-        //     }
-        //   }
-        // } else {
-        //   if (e1x + e1w / 2 > e2x - e2w / 2) {
-        //     if (e2y > e1y) {
-        //       direction = 'topLeft';
-        //       b1x = e1x - 20;
-        //       b1y = e1y + e1h / 2 - 20;
-        //       b2x = e2x + 20;
-        //       b2y = e2y - e2h / 2 + 20;
-        //       left = b1x;
-        //       top = b1y;
-        //     } else {
-        //       direction = 'bottomLeft';
-        //       b1x = e1x - 20;
-        //       b1y = e1y - e1h / 2 + 20;
-        //       b2x = e2x + 20;
-        //       b2y = e2y + e2h / 2 - 20;
-        //       left = b1x;
-        //       top = b2y;
-        //     }
-        //   } else {
-        //     if (e2y > e1y) {
-        //       direction = 'leftBottom';
-        //       b1x = e1x + e1w / 2 - 20;
-        //       b1y = e1y + 20;
-        //       b2x = e2x - e2w / 2 + 20;
-        //       b2y = e2y - 20;
-        //       left = b1x;
-        //       top = b2y;
-        //     } else {
-        //       direction = 'leftTop';
-        //       b1x = e1x + e1w / 2 - 20;
-        //       b1y = e1y - 20;
-        //       b2x = e2x - e2w / 2 + 20;
-        //       b2y = e2y + 20;
-        //       left = b1x;
-        //       top = b1y;
-        //     }
-        //   }
-        // }
+        let pb = this.countBezierPoint(sx,sy,ex,ey,direction)
         return {
           direction: direction,
           b1x: b1x,
@@ -193,7 +237,12 @@
           b2x: b2x,
           b2y: b2y,
           left: left,
-          top: top
+          top: top,
+          sx : sx,
+          sy : sy,
+          ex : ex,
+          ey : ey,
+          pb : pb,
         }
       },
       connectByLine: function (elem1, elem2) {
@@ -207,45 +256,27 @@
         let e2w = elem2.clientWidth;
         let e2h = elem2.clientHeight;
         // 获取两个元素之间的关系
-        let pointer = this.getLinePointerSize(e1x, e1y, e1w, e1h, e2x, e2y, e2w, e2h);
+        let p = this.getLinePointerSize(e1x, e1y, e1w, e1h, e2x, e2y, e2w, e2h);
 
         let boxStyle = {
-          width: Math.abs(pointer.b1x - pointer.b2x) + "px",
-          height: Math.abs(pointer.b1y - pointer.b2y) + "px",
+          width: Math.abs(p.b1x - p.b2x) + "px",
+          height: Math.abs(p.b1y - p.b2y) + "px",
           display: "absolute",
-          left: pointer.left + "px",
-          top: pointer.top + "px",
-          background :"rgba(0,0,0,0.5)",
+          left: p.left + "px",
+          top: p.top + "px",
+          zIndex:-1,
+          // background: "rgba(0,0,0,0.5)",
         };
-        console.log("pointer1","x:",e1x,"y:",e1y,"w",e1w,"h",e1h);
-        console.log("pointer2","x:",e2x,"y:",e2y,"w",e2w,"h",e2h);
-        console.log(pointer);
+        console.log("pointer1", "x:", e1x, "y:", e1y, "w", e1w, "h", e1h);
+        console.log("pointer2", "x:", e2x, "y:", e2y, "w", e2w, "h", e2h);
+        console.log(p);
         console.log(boxStyle);
 
+        let d = 'M' + p.sx + " " + p.sy + " C" + p.pb.p1x + " " + p.pb.p1y + "," + p.pb.p2x + " " + p.pb.p2y + "," + p.ex + " " + p.ey
         let line = {
-          boxStyle: boxStyle
+          boxStyle: boxStyle,
+          d:d,
         };
-        // let boxWidth = Math.abs(e1x - e2x) - e1w/2 - e2w/2 + 40
-
-        // let boxWidth = elem2x - elem1x + 40;
-        // let boxHeight = elem2y - elem1y + 40;
-        // let boxStyle = {
-        //   width : boxWidth + "px",
-        //   height : boxHeight + "px",
-        //   display:"absolute",
-        //   left : elem1x - 20 + "px",
-        //   top : elem1y - 20 + "px"
-        // };
-        // let curve2 = (elem2x - elem1x)*0.67 + " " + (elem2y - elem1y)/3;
-        // let curve1 = (elem2x - elem1x)/3 + " " + (elem2y - elem1y)*0.67;
-        // console.log(elem2.offsetTop);
-        // console.log(elem2.clientHeight);
-        // let d = "M20 20 C" + curve1 + "," + curve2 + "," + elem2x  + " " + elem2y;
-        // let line = {
-        //   boxStyle : boxStyle,
-        //   d : d
-        // };
-        // console.log(line);
         this.lineList.push(line);
       },
       onLongTap: function (event) {
@@ -299,15 +330,25 @@
     position: absolute;
     width: 30px;
     height: 30px;
-    left: 200px;
+    left: 220px;
     top: 100px;
     background: red;
   }
+
   .point3 {
     position: absolute;
     width: 30px;
     height: 30px;
     left: 200px;
+    top: 200px;
+    background: red;
+  }
+
+  .point4 {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    left: 120px;
     top: 200px;
     background: red;
   }
