@@ -1,93 +1,105 @@
 <template>
-  <div id="timeline" ref="container" class="timeline-container">
-    <div class="timeline-header">{{lineInfo.title}}</div>
-    <div class="timeline-body">
-      <!-- 时间轴-横向 -->
-      <table class="timeline-timetable timeline-horizontal">
-        <thead>
-        <tr>
-          <th colspan="2" class="scale-major">\时间</th>
-          <template v-for="item in dateList">
-            <th v-bind:colspan="item.medium.length * 2" class="scale-major">{{item.tagName}}</th>
-          </template>
-        </tr>
-        <tr>
-          <th colspan="2" class="scale-medium">分类\</th>
-          <template v-for="item in dateList">
-            <template v-for="m in item.medium">
-              <th colspan="2" v-bind:id="m.tag" v-bind:startYear="m.startYear" v-bind:startDate="m.startDate" v-bind:endYear="m.endYear" v-bind:endDate="m.endDate" class="scale-medium">{{m.tagName}}</th>
+  <div id="eventLayout" ref="eventLayout" class="timeline-layout"
+       v-finger:press-move="pressMove.bind(this)"
+       v-finger:touch-end="pressEnd.bind(this)"
+       v-bind:style="{left:timeline.left+'px',top:timeline.top+'px'}">
+    <div class="timeline-box">
+      <div class="timeline-header">{{lineInfo.title}}</div>
+      <div class="timeline-body">
+        <!-- 时间轴-横向 -->
+        <table class="timeline-timetable timeline-horizontal">
+          <thead>
+          <tr>
+            <th colspan="2" class="scale-major">\时间</th>
+            <template v-for="item in dateList">
+              <th v-bind:colspan="item.medium.length * 2" class="scale-major">{{item.tagName}}</th>
             </template>
-          </template>
-        </tr>
-        </thead>
-      </table>
-      <!-- 事件 -->
-      <div class="timeline-events">
-        <!-- 事件节点 -->
-        <template v-for="item in lineInfo.historyList">
-          <div class="timeline-cate" v-bind:tag="item.cateId">
-            <div v-for="node in item.line" v-bind:id="'node'+node.historyId" v-bind:year="node.year" v-bind:date="node.date"  class="timeline-node timeline-event-pointer"  v-bind:tag="node.title"></div>
-          </div>
-        </template>
-        <!--<div class="timeline-node timeline-event-pointer"></div>-->
-        <!--<div class="timeline-node timeline-event-pointer"></div>-->
-        <!--<div class="timeline-node timeline-event-pointer"></div>-->
-      </div>
-      <!-- 事件连线 -->
-      <canvas class="timeline-line-canvas"></canvas>
-      <!-- 时间轴-纵向 -->
-      <table class="timeline-timetable timeline-vertical">
-        <tbody>
-        <tr>
-          <th class="scale-small scale-cate">
-            <div v-for="cate in lineInfo.cateList">
-              {{cate.cateName}}
+          </tr>
+          <tr>
+            <th colspan="2" class="scale-medium">分类\</th>
+            <template v-for="item in dateList">
+              <template v-for="m in item.medium">
+                <th colspan="2" v-bind:id="m.tag" v-bind:startYear="m.startYear" v-bind:startDate="m.startDate"
+                    v-bind:endYear="m.endYear" v-bind:endDate="m.endDate" class="scale-medium">{{m.tagName}}
+                </th>
+              </template>
+            </template>
+          </tr>
+          </thead>
+        </table>
+        <!-- 事件 -->
+        <div class="timeline-events">
+          <!-- 事件节点 -->
+          <template v-for="item in lineInfo.historyList">
+            <div class="timeline-cate" v-bind:tag="item.cateId">
+              <div v-for="node in item.line" v-on:click="showPos" v-bind:id="'node'+node.historyId"
+                   v-bind:year="node.year" v-bind:date="node.date" class="timeline-node timeline-event-pointer"
+                   v-bind:tag="node.title"></div>
             </div>
-          </th>
-          <template v-for="item in dateList">
-            <template v-for="m in item.medium">
-              <th colspan="2" class="scale-small"><span class="spacer-cell"></span></th>
-            </template>
           </template>
-          <!--<td class="scale-small">-->
-          <!--<span class="spacer-cell"></span>-->
-          <!--</td>-->
-        </tr>
-        </tbody>
-      </table>
+        </div>
+        <!-- 事件连线 -->
+        <canvas class="timeline-line-canvas"></canvas>
+        <!-- 时间轴-纵向 -->
+        <table class="timeline-timetable timeline-vertical">
+          <tbody>
+          <tr>
+            <th class="scale-small scale-cate">
+              <div v-for="cate in lineInfo.cateList">
+                {{cate.cateName}}
+              </div>
+            </th>
+            <template v-for="item in dateList">
+              <template v-for="m in item.medium">
+                <th colspan="2" class="scale-small"><span class="spacer-cell"></span></th>
+              </template>
+            </template>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
 </template>
 
 <script>
-
-  // import axios from 'axios'
+  import Vue from 'vue'
+  import AlloyFinger from 'alloyfinger'
+  import AlloyFingerPlugin from 'alloyfinger/vue/alloy_finger.vue'
+  import Transform from '../../static/js/transform.js'
 
   import DateUtil from 'static/js/date-util.js'
-  import data from 'static/json/timeline.json'
+  // import data from 'static/json/timeline.json'
+
+  Vue.use(AlloyFingerPlugin, {
+    AlloyFinger
+  });
 
   var initScale = 1
   export default {
     name: "Timeline",
+    props: ['timeline', 'id'],
     data() {
       return {
         initScale: 1,
 
-        lineInfo: data,
-        dateList :[],
+        // lineInfo: data,
+        dateList: [],
+        lineInfo: this.timeline.info,
       }
     },
 
     mounted() {
+      // let el = document.getElementById("eventLayout");
+      Transform(this.$refs.eventLayout);
+      this.lineInfo = this.timeline.info;
       this.dateList = this.calculateDateLineByHistoryList(this.lineInfo.historyList)
-      this.$nextTick(function(){
+      this.$nextTick(function () {
         let that = this
-        for(let i = 0 ; i < that.lineInfo.historyList.length ; i++){
-          for(let j = 0 ; j < that.lineInfo.historyList[i].line.length ; j++){
+        for (let i = 0; i < that.lineInfo.historyList.length; i++) {
+          for (let j = 0; j < that.lineInfo.historyList[i].line.length; j++) {
             that.calculateNode(that.lineInfo.historyList[i].line[j])
           }
-
         }
       })
 
@@ -116,15 +128,55 @@
     },
     computed: {},
     methods: {
-      calculateNode : function(node){
+      showPos: function (event) {
+        console.log(event);
+      },
+      pressMove: function (evt) {
+        // console.log("timeline",evt);
+        // console.log(evt.deltaX,evt.deltaY)
+        let obj = document.getElementById("eventLayout");
+        let left = obj.offsetLeft + evt.deltaX;
+        let top = obj.offsetTop + evt.deltaY;
+        obj.style.left = left + "px";
+        obj.style.top = top + "px";
+        let data = {
+          isMoving: true,
+          id: "eventLayout"
+        };
+        // console.log("timeline emit",data);
+        this.$emit("setMoving", data)
+        evt.preventDefault();
+      },
+      pressEnd: function (evt) {
+        this.$emit("setMoving", false)
+      },
+      getNodePositionList: function () {
+        let info = this.lineInfo;
+        let pointerList = [];
+        for (let i = 0; i < info.historyList.length; i++) {
+          for (let j = 0; j < info.historyList[i].line.length; j++) {
+            let history = info.historyList[i].line[j];
+            if (history.historyId !== null && history.cardId != null) {
+              let pointer = {
+                tag: "node" + history.historyId + "_" + "card" + history.cardId,
+                elem1: document.getElementById("node" + history.historyId),
+                elem2: document.getElementById("card" + history.cardId)
+              }
+              pointerList.push(pointer)
+            }
+          }
+        }
+        return pointerList
+      },
+      calculateNode: function (node) {
         // this.$refs.
-        for(let i = 0 ; i < this.dateList.length ; i++){
-          for(let j = 0 ; j < this.dateList[i].medium.length ; j++){
+        for (let i = 0; i < this.dateList.length; i++) {
+          for (let j = 0; j < this.dateList[i].medium.length; j++) {
             let item = this.dateList[i].medium[j]
-            if(node.year >= item.startYear && node.year <= item.endYear && node.date >= item.startDate && node.date <= item.endDate){
-                let timeTag = document.getElementById(""+item.tag)
-                let nodeTag = document.getElementById("node"+node.historyId)
-                nodeTag.style.left = timeTag.offsetLeft + 23 + "px"
+            if (node.year >= item.startYear && node.year <= item.endYear && node.date >= item.startDate && node.date <= item.endDate) {
+              let timeTag = document.getElementById("" + item.tag)
+              let nodeTag = document.getElementById("node" + node.historyId)
+              nodeTag.style.left = timeTag.offsetLeft + 23 + "px"
             }
           }
         }
@@ -156,15 +208,15 @@
           // -5000年到-3001年，200年一个单位
           // let n = time.year / 100;
           rangeYear = -5000;
-          startYear = -5000 + Math.floor((time.year - rangeYear)/200) * 200;
+          startYear = -5000 + Math.floor((time.year - rangeYear) / 200) * 200;
           endYear = startYear + 199
-        }else if (time.year > -3000){
+        } else if (time.year > -3000) {
           if (time.date === 0) {
             // -3000年以后，如果精确到年，则10年一个单位，100年一个组
-            rangeYear = Math.floor(time.year/100) * 100;
-            startYear = Math.floor(time.year/10) * 10;
+            rangeYear = Math.floor(time.year / 100) * 100;
+            startYear = Math.floor(time.year / 10) * 10;
             endYear = startYear + 9;
-          }else if(time.date%10000 === 0){
+          } else if (time.date % 10000 === 0) {
             // 如果精确到月，则1月一个单位，12个月一个组
             rangeYear = time.year;
             rangeDate = 10000;
@@ -172,50 +224,50 @@
             startDate = 10000;
             endYear = time.year;
             endDate = 120000;
-          }else if(time.date%100 === 0){
+          } else if (time.date % 100 === 0) {
             // 如果精确到日，则2天一个单位，31天一个组，
-            let month = Math.floor(time.date/10000);
+            let month = Math.floor(time.date / 10000);
             rangeYear = time.year;
-            rangeDate = Math.floor(time.date/10000) * 10000 + 100;
+            rangeDate = Math.floor(time.date / 10000) * 10000 + 100;
 
             startYear = time.year;
-            startDate = time.date%200 === 0 ? time.date - 100 : time.date;
+            startDate = time.date % 200 === 0 ? time.date - 100 : time.date;
             endYear = time.year;
             endDate = startDate + 100;
-            let lastDate =  month * 10000 + DateUtil.getLastDay(time.year,month) * 100;
-            if(endDate > lastDate){
+            let lastDate = month * 10000 + DateUtil.getLastDay(time.year, month) * 100;
+            if (endDate > lastDate) {
               endDate = lastDate
             }
-          }else{
+          } else {
             // 如果精确到时，则2小时一个单位，24小时一个组
             rangeYear = time.year;
-            rangeDate = Math.floor(time.date/100) * 100;
+            rangeDate = Math.floor(time.date / 100) * 100;
             startYear = time.year;
-            startDate = time.date%2 === 0 ? time.date : time.date - 1
+            startDate = time.date % 2 === 0 ? time.date : time.date - 1
             endYear = time.year;
             endDate = startDate + 1
           }
         }
         return {
-          rangeYear : rangeYear,
-          rangeDate : rangeDate,
-          startYear : startYear,
-          startDate : startDate,
-          endYear : endYear,
-          endDate : endDate,
+          rangeYear: rangeYear,
+          rangeDate: rangeDate,
+          startYear: startYear,
+          startDate: startDate,
+          endYear: endYear,
+          endDate: endDate,
         }
       },
       compareDate: function (x, y) {
-        if(x.year > y.year){
+        if (x.year > y.year) {
           return 1
-        }else if(x.year < y.year){
+        } else if (x.year < y.year) {
           return -1
-        }else{
-          if(x.date > y.date){
+        } else {
+          if (x.date > y.date) {
             return 1
-          }else if(x.date < y.date){
+          } else if (x.date < y.date) {
             return -1
-          }else{
+          } else {
             return 0
           }
         }
@@ -227,8 +279,8 @@
         for (let i = 0; i < hl.length; i++) {
           for (let j = 0; j < hl[i].line.length; j++) {
             dateList.push({
-              year : hl[i].line[j].year,
-              date : hl[i].line[j].date
+              year: hl[i].line[j].year,
+              date: hl[i].line[j].date
             })
           }
         }
@@ -238,7 +290,7 @@
         dateList.sort(function (x, y) {
           return that.compareDate(x, y)
         });
-        console.log("sort",dateList)
+        console.log("sort", dateList)
         let list = []
         // 开始计算时间轴
         for (let i = 0; i < dateList.length; i++) {
@@ -251,14 +303,14 @@
             if (major.rangeYear === medium.rangeYear && major.rangeDate === medium.rangeDate) {
               isMajorExist = true;
               let isMediumExist = false;
-              for(let j = 0 ; j < major.medium.length ; j++){
+              for (let j = 0; j < major.medium.length; j++) {
                 let m = major.medium[j];
-                if(m.startYear === medium.startYear && m.startDate === medium.startDate){
+                if (m.startYear === medium.startYear && m.startDate === medium.startDate) {
                   isMediumExist = true;
                   break;
                 }
               }
-              if(!isMediumExist){
+              if (!isMediumExist) {
                 medium.tag = this.getTag(medium);
                 medium.tagName = this.getMediumTagName(medium)
                 major.medium.push(medium);
@@ -280,7 +332,7 @@
               startDate: medium.startDate,
               endYear: medium.endYear,
               endDate: medium.endDate,
-              medium : [],
+              medium: [],
             };
             medium.tag = this.getTag(medium);
             medium.tagName = this.getMediumTagName(medium)
@@ -292,69 +344,69 @@
         return list;
 
       },
-      getTag(time){
+      getTag(time) {
         let year = time.startYear;
         let date = time.startDate;
         let len = date.toString().length;
-        while(len < 6){
+        while (len < 6) {
           date = "0" + date;
           len++;
         }
         return year + date;
       },
-      getMajorTagName(major){
+      getMajorTagName(major) {
         let startStr = "";
         let endStr = ""
-        startStr = this.getMajorTagNameByTime(major.startYear,major.startDate);
-        endStr = this.getMajorTagNameByTime(major.endYear,major.endDate);
-        if(startStr === endStr){
+        startStr = this.getMajorTagNameByTime(major.startYear, major.startDate);
+        endStr = this.getMajorTagNameByTime(major.endYear, major.endDate);
+        if (startStr === endStr) {
           return startStr
-        }else{
+        } else {
           return startStr + "至" + endStr
         }
       },
-      getMediumTagName(medium){
-        return this.getMediumTagNameByTime(medium.startYear,medium.startDate)
+      getMediumTagName(medium) {
+        return this.getMediumTagNameByTime(medium.startYear, medium.startDate)
         // return this.getTagName(medium.startYear,1) + this.getTagName(medium.startDate,3,1)
       },
-      getMediumTagNameByTime(year,date){
-        if(date === 0){
-          if(year < 0){
+      getMediumTagNameByTime(year, date) {
+        if (date === 0) {
+          if (year < 0) {
             return "BC" + (-year) + "年"
-          }else{
+          } else {
             return year + "年"
           }
-        }else{
-          let month = Math.floor(date/10000);
+        } else {
+          let month = Math.floor(date / 10000);
           date = date - month * 10000;
-          let day = Math.floor(date/100);
+          let day = Math.floor(date / 100);
           date = date - day * 100;
           let hour = date
-          if(hour !== 0){
+          if (hour !== 0) {
             return hour + ":00"
-          }else if(day !== 0){
+          } else if (day !== 0) {
             return day + "日"
-          }else if(month !== 0){
+          } else if (month !== 0) {
             return month + "月"
           }
         }
       },
-      getMajorTagNameByTime(year,date){
+      getMajorTagNameByTime(year, date) {
         let str = ""
-        if(year < 0){
+        if (year < 0) {
           str += "BC" + (-year)
-        }else{
+        } else {
           str += year
         }
-        let month = Math.floor(date/10000);
+        let month = Math.floor(date / 10000);
         date = date - month * 10000;
-        let day = Math.floor(date/100);
+        let day = Math.floor(date / 100);
         date = date - day * 100;
         let hour = date
-        if(hour !== 0 && day !== 0 && month !== 0) {
-          str += "/"+month + "/" + day
-        }else if(hour === 0 && day !== 0 && month !== 0){
-          str += "/"+month
+        if (hour !== 0 && day !== 0 && month !== 0) {
+          str += "/" + month + "/" + day
+        } else if (hour === 0 && day !== 0 && month !== 0) {
+          str += "/" + month
         }
         return str
       },

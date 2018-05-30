@@ -10,8 +10,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Dynamic',
-      component: Dynamic
+      name: 'Index',
+      component: Index
     }
   ]
 })

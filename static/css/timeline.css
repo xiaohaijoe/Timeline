@@ -1,5 +1,8 @@
-.timeline-container {
+.timeline-layout {
   position:absolute;
+}
+
+.timeline-box{
   display: block;
   margin: 15px;
   /*width: 1000px;*/
@@ -66,12 +69,12 @@
   max-width: 60px !important;
 }
 
-.timeline-container .timeline-events {
+.timeline-box .timeline-events {
   position: absolute;
   /*height: 200px;*/
 }
 
-.timeline-container .timeline-events .timeline-cate{
+.timeline-box .timeline-events .timeline-cate{
   line-height:40px;
   /*width:40px;*/
   height:40px;

@@ -1,38 +1,19 @@
 <template>
   <div id="index">
-
-    <div class="line-box" style="top: 0px; left: 0px; width: 86.26px; height: 46.5697px;">
-      <svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg" class="line-svg">
-        <g class="line-svg-path  selected">
-          <path d="M20 20 C 66.25996016546014 20, 20 26.56973987839956, 66.25996016546014 26.56973987839956 "
-                stroke="black" fill="none" class="line-body"></path>
-          <path d="M20 20 C 66.25996016546014 20, 20 26.56973987839956, 66.25996016546014 26.56973987839956 "
-                stroke="black" fill="none" class="line-body-ghost"></path>
-        </g>
-      </svg>
-    </div>
     <div ref="container" class="container"
          v-finger:press-move="pressMoveContainer.bind(this)"
          v-finger:multipoint-start="multipointStart"
+         v-finger:touch-end="touchEnd"
          v-finger:pinch="pinch">
 
-      <!--<div id="myDiv" ref="myDiv" class="box"-->
-      <!--v-finger:press-move="pressMove.bind(this)">-->
-      <!--the element that you want to bind event-->
-      <!--</div>-->
-      <div ref="scalebox" style="position:relative">
-
-
-        <template v-for="event in eventInfo.eventList">
-          <timeline
-            v-bind:id="'event'+event.eventId"
-            v-bind:style="{left:event.left+'px',top:event.top+'px'}"
-            v-finger:press-move="pressMove.bind(this,event.eventId)"
-            v-finger:touch-end="pressEnd.bind(this)"></timeline>
-        </template>
-
+      <div class="scaleBox" ref="scaleBox" style="position:relative">
+        <timeline
+          ref="eventLayout1"
+          @setMoving="setMoving"
+          v-bind:timeline="eventInfo.timeline"></timeline>
+        <card @setMoving="setMoving" v-bind:cardList="eventInfo.cardList"></card>
+        <pointer ref="pointer"></pointer>
       </div>
-
     </div>
 
   </div>
@@ -45,6 +26,9 @@
   import Transform from '../../static/js/transform.js'
 
   import Timeline from '../components/Timeline'
+  import Card from '../components/Card'
+  import Pointer from '../components/Pointer'
+  import data from 'static/json/timeline.json'
 
   Vue.use(AlloyFingerPlugin, {
     AlloyFinger
@@ -56,122 +40,118 @@
       return {
         initScale: 1,
         isMoving: false,
+        // pointerList: [],
         eventInfo: {
-          eventList: [
+          timeline:
             {
               eventId: 1,
-              left: 100,
-              top: 100
+              left: 50,
+              top: 200,
+              info: data
             },
-            // {
-            //   eventId : 2,
-            //   left : 100,
-            //   top:100
-            // }
-          ]
+          cardList: [
+            {
+              cardId: 1,
+              title: "我是卡片1",
+              left: 50,
+              top: 50,
+            },
+            {
+              cardId: 2,
+              title: "我是卡片2",
+              left: 150,
+              top: 60,
+            },
+            {
+              cardId: 3,
+              title: "我是卡片3",
+              left: 50,
+              top: 600,
+            },
+            {
+              cardId: 4,
+              title: "我是卡片4",
+              left: 320,
+              top: 600,
+            },
+          ],
         }
       }
     },
 
     mounted() {
+      Transform(this.$refs.scaleBox)
 
-      // Transform(this.$refs.myDiv)
-      Transform(this.$refs.scalebox)
-      for (let i = 0; i < this.eventInfo.eventList.length; i++) {
-        let event = this.eventInfo.eventList[i]
-        let el = document.getElementById("event" + event.eventId);
-        Transform(el);
-      }
+      this.initPointer();
     },
     methods: {
-
-      pressMove: function (eventId, evt) {
-        let obj = document.getElementById("event" + eventId);
-        obj.translateX += evt.deltaX;
-        obj.translateY += evt.deltaY;
-        this.isMoving = true
-        evt.preventDefault();
+      initPointer: function () {
+        this.$nextTick(() => {
+          let pointerList = this.$refs.eventLayout1.getNodePositionList();
+          this.$refs.pointer.init(pointerList)
+        })
+      },
+      setMoving: function(data){
+        this.isMoving = data.isMoving;
+        let pointerList = this.$refs.eventLayout1.getNodePositionList();
+        this.$refs.pointer.refreshPointer(data.id,pointerList);
       },
       pressEnd: function (evt) {
-        this.isMoving = false
+        this.isMoving = false;
+      },
+      touchEnd : function(){
+        let pointerList = this.$refs.eventLayout1.getNodePositionList();
+        this.$refs.pointer.init(pointerList);
       },
       pressMoveContainer: function (evt) {
         if (this.isMoving) {
           return
         }
-        for (let i = 0; i < this.eventInfo.eventList.length; i++) {
-          let event = this.eventInfo.eventList[i]
-          let el = document.getElementById("event" + event.eventId);
-          el.translateX += evt.deltaX;
-          el.translateY += evt.deltaY;
+        this.$refs.pointer.hidePointer();
+        for (let i = 0; i < this.eventInfo.cardList.length; i++) {
+          let card = this.eventInfo.cardList[i]
+          let el = document.getElementById("card" + card.cardId);
+          let left = el.offsetLeft + evt.deltaX;
+          let top = el.offsetTop + evt.deltaY;
+          el.style.left = left + "px";
+          el.style.top = top + "px";
           evt.preventDefault();
         }
+        let el = document.getElementById("eventLayout")
+        let left = el.offsetLeft + evt.deltaX;
+        let top = el.offsetTop + evt.deltaY;
+        el.style.left = left + "px";
+        el.style.top = top + "px";
+        evt.preventDefault();
 
       },
       multipointStart: function () {
-        this.initScale = this.$refs.scalebox.scaleX;
+        this.initScale = this.$refs.scaleBox.scaleX;
       },
       pinch: function (evt) {
-        // for(let i = 0 ; i < this.eventInfo.eventList.length ; i++){
-        //   let event = this.eventInfo.eventList[i]
-        //   let el = document.getElementById("event"+event.eventId);
-        // el.translateX += evt.deltaX;
-        // el.translateY += evt.deltaY;
-        this.$refs.scalebox.scaleX = this.$refs.scalebox.scaleY = this.initScale * evt.zoom;
-        // evt.preventDefault();
-        // }
-
+        this.$refs.scaleBox.scaleX = this.$refs.scaleBox.scaleY = this.initScale * evt.zoom;
       }
     },
     components: {
-      'Timeline': Timeline
+      'Timeline': Timeline,
+      'Card': Card,
+      'Pointer': Pointer,
     }
   }
 </script>
 
 <style scoped>
-  .box {
-    position: absolute;
-    top: 100px;
-    /*background: blue;*/
-    height: 100px
-  }
-
   .container {
     position: fixed;
     width: 100%;
     height: 100%;
-    /*background: red;*/
   }
 
-
-  .line-box {
-    position: absolute;
-    pointer-events: none;
-    transition: all .3s;
-    outline: 2px dashed rgba(0, 0, 0, 0.12);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .line-box svg {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-  }
-  .line-box:not(.ghost) .line-body-ghost, .line-box:not(.ghost) .line-body {
-    pointer-events: auto;
+  .container .event-layout {
+    position: relative;
   }
 
-  .line-box path.line-body {
-    stroke-width: 3px;
-    stroke: #acacac;
-    marker-end: url(#Triangle);
-    /* marker-start: url(#markerCircle); */
-  }
-  .line-box path.line-body-ghost {
-    stroke-width: 40px;
-    stroke: transparent;
+  .container .card-layout {
+    position: relative;
   }
 </style>

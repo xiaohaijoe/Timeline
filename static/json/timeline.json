@@ -23,21 +23,24 @@
           "year" : 1949,
           "date" : 100000,
           "title": "新中国成立",
-          "desc": ""
+          "desc": "",
+          "cardId": 1
         },
         {
           "historyId": 2,
           "year": 1990,
           "date": 92913,
           "title": "大魔王诞生",
-          "desc": ""
+          "desc": "",
+          "cardId": 1
         },
         {
           "historyId": 3,
           "year":1990,
           "date":92914,
           "title": "大魔王诞生",
-          "desc": ""
+          "desc": "",
+          "cardId": 2
         }
       ]
     },
@@ -49,14 +52,16 @@
           "year": 1576,
           "date":60700,
           "title": "美国诞生",
-          "desc": ""
+          "desc": "",
+          "cardId": 3
         },
         {
           "historyId": 5,
           "year" : 1882,
           "date" : 60700,
           "title": "美国内战",
-          "desc": ""
+          "desc": "",
+          "cardId": 4
         }
       ]
     },
@@ -68,14 +73,16 @@
           "year" : -609,
           "date": 0,
           "title": "唐朝诞生",
-          "desc": ""
+          "desc": "",
+          "cardId": 2
         },
         {
           "historyId": 7,
           "year": -608,
           "date": 0,
           "title": "唐朝诞生",
-          "desc": ""
+          "desc": "",
+          "cardId": 4
         },
         {
           "historyId": 8,
