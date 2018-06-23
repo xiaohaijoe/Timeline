@@ -7,13 +7,15 @@ let fetch = async function (url, data) {
   return new Promise((resolve, reject) => {
     axios.post(url, data)
       .then(response =>{
-        console.log(response)
-        resolve(response)
+        let data = response.data;
+        console.log(data);
+        resolve(data)
       })
       .catch(response =>{
         console.log(response)
         reject(response)
       })
   });
-}
+};
+
 export default fetch;

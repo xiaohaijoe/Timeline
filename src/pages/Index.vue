@@ -2,7 +2,8 @@
   <div id="index">
     <!--这是首页-->
     <!--<router-link id="href" to="/account/login">跳转啊啊啊啊啊</router-link>-->
-    <img id="logo" src="static/images/ic-logo-lg.png" />
+    <div>11</div>
+    <img id="logo" src="@/assets/images/ic-logo-lg.png" />
   </div>
 </template>
 

@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/pages/Index'
-import AccountLogin from '@/pages/Account/Login'
-import AccountRegister from '@/pages/Account/Register'
+import AccountLogin from '@/pages/account/Login'
+import AccountRegister from '@/pages/account/Register'
 import Dynamic from '@/pages/Dynamic'
+import Album from '@/pages/Album'
 
 
 Vue.use(Router)
