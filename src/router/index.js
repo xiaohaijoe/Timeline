@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/pages/Index'
+import Home from '@/pages/home/Index'
 import AccountLogin from '@/pages/account/Login'
 import AccountRegister from '@/pages/account/Register'
 import Dynamic from '@/pages/Dynamic'
@@ -15,6 +16,11 @@ export default new Router({
       path: '/',
       name: 'Index',
       component: Index
+    },
+    {
+      path:'/home',
+      name:'Home',
+      component:Home
     },
     {
       path : '/account/login',

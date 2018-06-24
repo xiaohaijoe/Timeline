@@ -1,13 +1,14 @@
 <template>
   <div id="index">
     <!--这是首页-->
-    <!--<router-link id="href" to="/account/login">跳转啊啊啊啊啊</router-link>-->
-    <div>11</div>
     <img id="logo" src="@/assets/images/ic-logo-lg.png" />
   </div>
 </template>
 
 <script>
+  import Token from "@/util/token"
+  import Request from "@/request"
+  import '@/assets/css/app.scss'
 
   export default {
     name: "Index",
@@ -22,17 +23,28 @@
     },
     methods: {
       start(){
-        setTimeout(()=>{
-          this.$router.push('/account/login');
-        },1000)
+        Request.checkToken(Token.getToken(),(data)=>{
+          setTimeout(()=>{
+            this.$router.push('/home');
+          },1000)
+        },()=>{
+          setTimeout(()=>{
+            this.$router.push('/account/login');
+          },1000)
+        });
+
       }
     },
     components: {
-
     }
   }
 </script>
 
+<style>
+  body {
+    background: #fdfbf4;
+  }
+</style>
 <style scoped>
   #logo{
     width:12rem;

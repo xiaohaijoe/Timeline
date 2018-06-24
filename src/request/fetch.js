@@ -2,20 +2,22 @@ import axios from 'axios'
 import {requestUrl} from '../config/env'
 
 
-let fetch = async function (url, data) {
+let fetch = function (url, data,success,fail,error) {
   url = requestUrl + url;
-  return new Promise((resolve, reject) => {
-    axios.post(url, data)
-      .then(response =>{
-        let data = response.data;
-        console.log(data);
-        resolve(data)
-      })
-      .catch(response =>{
-        console.log(response)
-        reject(response)
-      })
-  });
+  axios.post(url, data)
+    .then(response => {
+      let data = response.data;
+      console.log(data);
+      if(data.err === 0){
+        success(data)
+      }else{
+        fail(data)
+      }
+    })
+    .catch(response => {
+      console.log(response);
+      error(response)
+    })
 };
 
 export default fetch;

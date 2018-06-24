@@ -2,10 +2,6 @@ $fs-l : 2rem;
 $fs-m : 1.2rem;
 $fs-s : 1rem;
 
-body{
-  background: #f5f5f5;
-}
-
 .tl-cf:after{
   content:"";
   display: block;
@@ -16,6 +12,9 @@ body{
 }
 .tl-fr{
   float:right;
+}
+.tl-center{
+  text-align: center;
 }
 .tl-yellow{
   color:#fdcb10;
@@ -30,8 +29,16 @@ body{
   color:#999;
 }
 
+.tl-shadow-1{
+  box-shadow:0 0 0.5rem 0 #d4d4d4;
+}
+
+.tl-container{
+  margin-top:41px;
+}
+
 .mint-header{
-  background:linear-gradient(to right,#fed641, #ffc000);
+  background:linear-gradient(to right,#fed641,#ffc000 50%, #f6739d);
 }
 
 .mint-button{
@@ -44,6 +51,9 @@ body{
 }
 .mint-button--primary.tl-button-shadow{
   box-shadow:0 0 0.2rem 0.1rem #fdcb10;
+}
+.mint-button.tl-button-round{
+  border-radius:2rem;
 }
 
 
