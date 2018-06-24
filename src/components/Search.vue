@@ -43,6 +43,7 @@
       padding: 0 0.5rem;
       box-shadow: none;
       outline-style: none;
+      font-size:0.9rem;
     }
   }
 </style>

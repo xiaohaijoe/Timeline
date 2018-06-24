@@ -5,7 +5,7 @@
   "author": "hijack <xiaohaijoe@hotmail.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --host 172.17.4.236",
+    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --host localhost",
     "start": "npm run dev",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
@@ -17,6 +17,7 @@
     "axios": "^0.18.0",
     "dynamics.js": "^1.1.5",
     "mint-ui": "^2.2.13",
+    "moment": "^2.22.2",
     "node-sass": "^4.9.0",
     "sass-loader": "^7.0.3",
     "vue": "^2.5.2",

@@ -6,22 +6,39 @@
 </template>
 
 <script>
-export default {
-  name: 'App'
-}
+  export default {
+    name: 'App'
+  }
 </script>
 
 <style>
-  body{
-    margin:0;
+  body {
+    margin: 0;
     background: #f5f5f5;
   }
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  /*text-align: center;*/
-  color: #2c3e50;
-  /*margin-top: 60px;*/
-}
+
+  a:link {
+    text-decoration: none;
+  }
+
+  a:active {
+    text-decoration: none
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
+
+  a:visited {
+    text-decoration: none;
+  }
+
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /*text-align: center;*/
+    color: #2c3e50;
+    /*margin-top: 60px;*/
+  }
 </style>

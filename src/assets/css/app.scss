@@ -28,9 +28,14 @@ $fs-s : 1rem;
 .tl-grey-3{
   color:#999;
 }
+.tl-truncate{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
 
 .tl-shadow-1{
-  box-shadow:0 0 0.5rem 0 #d4d4d4;
+  box-shadow:0 0 0.5rem 0 #e8e8e8;
 }
 
 .tl-container{

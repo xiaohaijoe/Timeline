@@ -13,6 +13,10 @@ const request = {
     token: token
   }, success, fail),
 
+  getUserInfo : (token, success, fail) => fetch('/api/user/getUserInfo', {
+    token: token
+  },success,fail),
+
   // 个人中心-获取专辑列表
   getUserAlbums: (token, success, fail) => fetch('/api/user/getUserAlbums', {
     token: token
