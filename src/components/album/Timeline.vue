@@ -66,7 +66,7 @@
   import Vue from 'vue'
   import AlloyFinger from 'alloyfinger'
   import AlloyFingerPlugin from 'alloyfinger/vue/alloy_finger.vue'
-  import Transform from '../../static/js/transform.js'
+  import Transform from '../../../static/js/transform.js'
 
   import DateUtil from 'static/js/date-util.js'
   // import data from 'static/json/timeline.json'
@@ -415,6 +415,6 @@
 </script>
 
 <style scoped>
-  @import '../../static/css/timeline.css';
+  @import '../../../static/css/timeline.css';
 
 </style>

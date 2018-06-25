@@ -13,18 +13,18 @@ const request = {
     token: token
   }, success, fail),
 
-  getUserInfo : (token, success, fail) => fetch('/api/user/getUserInfo', {
+  getUserInfo: (token, success, fail) => fetch('/api/user/getUserInfo', {
     token: token
-  },success,fail),
+  }, success, fail),
 
   // 个人中心-获取专辑列表
   getUserAlbums: (token, success, fail) => fetch('/api/user/getUserAlbums', {
     token: token
-  },success,fail),
+  }, success, fail),
 
-  getAlbumInfo: albumId => fetch('/api/album/getAlbumInfo', {
+  getAlbumInfo: (albumId, success, fail) => fetch('/api/album/getAlbumInfo', {
     albumId: albumId
-  })
+  }, success, fail)
 
 };
 export default request;

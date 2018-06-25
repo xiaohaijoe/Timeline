@@ -4,8 +4,7 @@ import Index from '@/pages/Index'
 import Home from '@/pages/home/Index'
 import AccountLogin from '@/pages/account/Login'
 import AccountRegister from '@/pages/account/Register'
-import Dynamic from '@/pages/Dynamic'
-import Album from '@/pages/Album'
+import Album from '@/pages/album/Index'
 
 
 Vue.use(Router)
@@ -21,6 +20,11 @@ export default new Router({
       path:'/home',
       name:'Home',
       component:Home
+    },
+    {
+      path:'/album/:albumId',
+      name:'Album',
+      component:Album
     },
     {
       path : '/account/login',

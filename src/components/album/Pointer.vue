@@ -23,7 +23,7 @@
 
 <script>
   import Vue from 'vue'
-  import dynamics from 'dynamics.js'
+  import dynamics from '../../../node_modules/dynamics.js/lib/dynamics'
   import AlloyFinger from 'alloyfinger'
   import AlloyFingerPlugin from 'alloyfinger/vue/alloy_finger.vue'
 

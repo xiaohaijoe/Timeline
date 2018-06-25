@@ -1,5 +1,5 @@
 <template>
-  <div id="index">
+  <div id="Album">
     <div ref="container" class="container"
          v-finger:press-move="pressMoveContainer.bind(this)"
          v-finger:multipoint-start="multipointStart"
@@ -23,22 +23,22 @@
   import Vue from 'vue'
   import AlloyFinger from 'alloyfinger'
   import AlloyFingerPlugin from 'alloyfinger/vue/alloy_finger.vue'
-  import Transform from '../../static/js/transform.js'
+  import Transform from '../../../static/js/transform.js'
 
-  import Album from '../components/Album'
-  import Timeline from '../components/Timeline'
-  import Card from '../components/Card'
-  import Pointer from '../components/Pointer'
+  // import Album from './Album'
+  import Timeline from './Timeline'
+  import Card from './Card'
+  import Pointer from './Pointer'
   import data from 'static/json/timeline.json'
 
-  import Request from '../request'
+  import Request from '../../request/index'
 
   Vue.use(AlloyFingerPlugin, {
     AlloyFinger
   });
 
   export default {
-    name: "Index",
+    name: "Album",
     data() {
       return {
         initScale: 1,
@@ -145,7 +145,7 @@
       'Timeline': Timeline,
       'Card': Card,
       'Pointer': Pointer,
-      'Album' : Album
+      // 'Album' : Album
     }
   }
 </script>

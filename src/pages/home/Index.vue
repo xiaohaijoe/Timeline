@@ -13,7 +13,7 @@
            infinite-scroll-disabled="loading"
            infinite-scroll-distance="10">
         <div class="pg-item" v-for="item in albumList" to="">
-          <router-link :to="{path:'/album',params:{albumId:item.albumId}}">
+          <router-link :to="{ name: 'Album', params: { albumId: item.albumId }}">
             <div class="pg-content tl-shadow-1">
               <img class="pg-img" v-lazy="item.image">
               <div class="pg-main">
