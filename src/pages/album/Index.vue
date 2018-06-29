@@ -13,6 +13,7 @@
     data(){
       return {
         albumId : this.$route.params.albumId,
+        aaa :"",
         albumInfo : null
       }
     },
