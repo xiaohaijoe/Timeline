@@ -1,6 +1,8 @@
 # timeline
 
-> A History Timeline Project
+> 时间轴管理工具
+> 完整效果请查看 http://timeline.xiaohaijoe.com
+> 因为我把项目变成了个人项目，所以完整代码就不提供了。
 
 ## Build Setup
 
